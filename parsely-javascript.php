@@ -7,7 +7,7 @@
 	<script data-cfasync="false">
 
 		function uuidProfileCall() {
-			var rootUrl = 'https://api.parsely.com/v2/profile?apikey=<?php echo esc_html( $parsely_options['apikey'] ); ?>';
+			var rootUrl = 'https://api.parsely.com/v2/profile?apikey=<?php echo encodeURIComponent( $parsely_options['apikey'] ); ?>';
 			var uuid = '&uuid=' + PARSELY.config.parsely_site_uuid;
 			var requestUrl = rootUrl + uuid + '&url=' + window.location.href;
 			jQuery.ajax({
@@ -39,23 +39,6 @@
 	</script>
 <?php endif; ?>
 
-<div id="parsely-root" style="display: none">
-	<div id="parsely-cfg" data-parsely-site="<?php echo esc_html( $parsely_options['apikey'] ); ?>"></div>
-</div>
-<script data-cfasync="false">
-	(function (s, p, d) {
-		var h = d.location.protocol, i = p + "-" + s,
-			e = d.getElementById(i), r = d.getElementById(p + "-root"),
-			u = h === "https:" ? "d1z2jf7jlzjs58.cloudfront.net"
-				: "static." + p + ".com";
-		if (e) return;
-		e = d.createElement(s);
-		e.id = i;
-		e.async = true;
-		e.setAttribute('data-cfasync', 'false');
-		e.src = h + "//" + u + "/p.js";
-		r.appendChild(e);
-	})("script", "parsely", document);
-</script>
+<script id="parsely-cfg" src="//static.parsely.com/keys/<?php echo encodeURIComponent( $parsely_options['apikey'] ); ?>/p.js"></script>
 
 <!-- END Parse.ly Include: Standard -->

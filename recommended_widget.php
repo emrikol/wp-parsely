@@ -17,19 +17,17 @@ class Parsely_Recommended_Widget extends WP_Widget {
 
 		// set up variables
 		$options = get_option( 'parsely' );
-		if ( array_key_exists( 'apikey', $options ) && array_key_exists( 'api_secret', $options ) && ! empty( $options['api_secret'] ) ) {
-			$root_url       = 'https://api.parsely.com/v2/related?apikey=' . $options['apikey'];
-			$pub_date_start = '&pub_date_start=' . $instance['published_within'] . 'd';
-			$sort           = '&sort=' . trim( $instance['sort'] );
+		if ( is_array($options) && array_key_exists( 'apikey', $options ) && array_key_exists( 'api_secret', $options ) && ! empty( $options['api_secret'] ) ) {
+			$api_url       = 'https://api.parsely.com/v2/related';
+			add_query_arg('apikey', $options['apikey'], $api_url);
+			add_query_arg('sort', trim( $instance['sort'] ), $api_url);
 			// No idea why boost is coming back with a space prepended: I've trimmed it everywhere I possibly could
 			// Trimming here too to avoid it ruining the query
-			$boost          = '&boost=' . trim( $instance['boost'] );
-			$limit          = '&limit=' . $instance['return_limit'];
-			$full_url       = $root_url . $sort . $boost . $limit;
-
+			add_query_arg('boost', trim( $instance['boost'] ), $api_url);
+		    add_query_arg('limit', $instance['return_limit'], $api_url);
 
 			if ( 0 !== (int) $instance['published_within'] ) {
-				$full_url .= $pub_date_start;
+				add_query_arg('pub_date_start', ($instance['published_within'] .= 'd'), $api_url);
 			}
 			?>
 			<script data-cfasync="false">
@@ -53,10 +51,10 @@ class Parsely_Recommended_Widget extends WP_Widget {
 						var uuid = JSON.parse(unescape(cookieVal))['id'];
 					}
 
-					var full_url = '<?php echo esc_js( $full_url ); ?>';
+					var full_url = '<?php echo wp_json_encode( $full_url ); ?>';
 
 
-					var personalized = '<?php echo esc_js( boolval( $instance['personalize_results'] ) ); ?>';
+					var personalized = '<?php echo wp_json_encode( boolval( $instance['personalize_results'] ) ); ?>';
 					if ( personalized && uuid ) {
 						full_url += '&uuid=';
 						full_url += uuid;
@@ -64,7 +62,7 @@ class Parsely_Recommended_Widget extends WP_Widget {
 					}
 					else {
 						full_url += '&url=';
-						full_url += '<?php echo esc_js( get_permalink() ); ?>';
+						full_url += '<?php echo wp_json_encode( get_permalink() ); ?>';
 
 					}
 					var parentDiv = jQuery.find('#<?php echo esc_attr( $this->id ); ?>');
@@ -235,7 +233,7 @@ class Parsely_Recommended_Widget extends WP_Widget {
 
 	public function update( $new_instance, $old_instance ) {
 		$instance                        = $old_instance;
-		$instance['title']               = trim( strip_tags( $new_instance['title'] ) );
+		$instance['title']               = trim( wp_strip_all_tags( $new_instance['title'] ) );
 		$instance['published_within']    = (int) trim( $new_instance['published_within'] );
 		$instance['return_limit']        = (int) $new_instance['return_limit'] <= 20 ? $new_instance['return_limit'] : '20';
 		$instance['sort']                = trim( $new_instance['sort'] );
