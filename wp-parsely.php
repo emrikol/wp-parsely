@@ -4,7 +4,7 @@ Plugin Name: Parse.ly
 Plugin URI: http://www.parsely.com/
 Description: This plugin makes it a snap to add Parse.ly tracking code to your WordPress blog.
 Author: Mike Sukmanowsky ( mike@parsely.com )
-Version: 1.12.1
+Version: 1.12.2
 Requires at least: 4.0.0
 Author URI: http://www.parsely.com/
 License: GPL2
@@ -37,7 +37,7 @@ class Parsely {
 	/**
 	 * @codeCoverageIgnoreStart
 	 */
-	const VERSION         = '1.12.1';
+	const VERSION         = '1.12.2';
 	const MENU_SLUG       = 'parsely';             // Defines the page param passed to options-general.php
 	const MENU_TITLE      = 'Parse.ly';            // Text to be used for the menu as seen in Settings sub-menu
 	const MENU_PAGE_TITLE = 'Parse.ly > Settings'; // Text shown in <title></title> when the settings screen is viewed
@@ -996,7 +996,7 @@ class Parsely {
 		if ( is_string( $val ) ) {
 			$val = str_replace( "\n", '', $val );
 			$val = str_replace( "\r", '', $val );
-			$val = strip_tags( $val );
+			$val = wp_strip_tags( $val );
 			$val = trim( $val );
 			return $val;
 		} else {
@@ -1021,7 +1021,7 @@ class Parsely {
 
 		if ( 'post' === $post ) {
 			$permalink        = get_permalink();
-			$parsed_canonical = parse_url( $permalink );
+			$parsed_canonical = wp_parse_url( $permalink );
 			$canonical        = $scheme . $parsed_canonical['host'] . $parsed_canonical['path'];
 			return $canonical;
 		}
