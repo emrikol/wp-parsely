@@ -497,8 +497,8 @@ class Parsely {
 	}
 
 	public function print_dynamic_tracking_note() {
-		$note = "This plugin does not currently support dynamic tracking ( the tracking of multiple pageviews on a single page). Some common use-cases for dynamic tracking are slideshows or articles loaded via AJAX calls in single-page applications -- situations in which new content is loaded without a full page refresh. Tracking these events requires manually implementing additional JavaScript above <a href='http://www.parsely.com/help/integration/basic/'>the standard Parse.ly include</a> that the plugin injects into your page source. Please consult <a href='https://www.parsely.com/help/integration/dynamic/'>the Parse.ly documentation on dynamic tracking</a> for instructions on implementing dynamic tracking, or contact Parse.ly support (<a href='support@parsely.com'>support@parsely.com</a> ) for additional assistance.";
-		echo esc_html( $note );
+		$note = 'This plugin does not currently support dynamic tracking (the tracking of multiple pageviews on a single page). Some common use-cases for dynamic tracking are slideshows or articles loaded via AJAX calls in single-page applications -- situations in which new content is loaded without a full page refresh. Tracking these events requires manually implementing additional JavaScript above <a href="https://www.parsely.com/help/integration/basic/">the standard Parse.ly include</a> that the plugin injects into your page source. Please consult <a href="https://www.parsely.com/help/integration/dynamic/">the Parse.ly documentation on dynamic tracking</a> for instructions, or contact <a href="mailto:support@parsely.com?subject=WP plugin dynamic tracking">Parse.ly support</a> for additional assistance.';
+		echo $note ;
 	}
 
 	/**
@@ -996,7 +996,7 @@ class Parsely {
 		if ( is_string( $val ) ) {
 			$val = str_replace( "\n", '', $val );
 			$val = str_replace( "\r", '', $val );
-			$val = wp_strip_tags( $val );
+			$val = wp_strip_all_tags( $val );
 			$val = trim( $val );
 			return $val;
 		} else {
@@ -1021,7 +1021,7 @@ class Parsely {
 
 		if ( 'post' === $post ) {
 			$permalink        = get_permalink();
-			$parsed_canonical = wp_parse_url( $permalink );
+			$parsed_canonical = parse_url( $permalink );
 			$canonical        = $scheme . $parsed_canonical['host'] . $parsed_canonical['path'];
 			return $canonical;
 		}
