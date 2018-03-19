@@ -20,6 +20,7 @@ class Parsely_Recommended_Widget extends WP_Widget {
 		if ( is_array($options) && array_key_exists( 'apikey', $options ) && array_key_exists( 'api_secret', $options ) && ! empty( $options['api_secret'] ) ) {
 			$api_url       = 'https://api.parsely.com/v2/related';
 			add_query_arg('apikey', $options['apikey'], $api_url);
+			error_log($api_url);
 			add_query_arg('sort', trim( $instance['sort'] ), $api_url);
 			// No idea why boost is coming back with a space prepended: I've trimmed it everywhere I possibly could
 			// Trimming here too to avoid it ruining the query
@@ -51,18 +52,18 @@ class Parsely_Recommended_Widget extends WP_Widget {
 						var uuid = JSON.parse(unescape(cookieVal))['id'];
 					}
 
-					var full_url = '<?php echo wp_json_encode( $full_url ); ?>';
+					var api_url = '<?php echo wp_json_encode( $api_url ); ?>';
 
 
 					var personalized = '<?php echo wp_json_encode( boolval( $instance['personalize_results'] ) ); ?>';
 					if ( personalized && uuid ) {
-						full_url += '&uuid=';
-						full_url += uuid;
+						api_url += '&uuid=';
+						api_url += uuid;
 
 					}
 					else {
-						full_url += '&url=';
-						full_url += '<?php echo wp_json_encode( get_permalink() ); ?>';
+						api_url += '&url=';
+						api_url += '<?php echo wp_json_encode( get_permalink() ); ?>';
 
 					}
 					var parentDiv = jQuery.find('#<?php echo esc_attr( $this->id ); ?>');
@@ -71,7 +72,7 @@ class Parsely_Recommended_Widget extends WP_Widget {
 					}
 					var outerDiv = jQuery('<div>').addClass('parsely-recommendation-widget').appendTo(parentDiv);
 					var outerList = jQuery('<ul>').addClass('parsely-recommended-widget').appendTo(outerDiv);
-					jQuery.getJSON( full_url, function (data) {
+					jQuery.getJSON( api_url, function (data) {
 						jQuery.each(data.data, function(key, value) {
 							var widgetEntry = jQuery('<li>')
 								.addClass('parsely-recommended-widget-entry')
