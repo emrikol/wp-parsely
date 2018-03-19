@@ -7,7 +7,7 @@
 	<script data-cfasync="false">
 
 		function uuidProfileCall() {
-			var rootUrl = 'https://api.parsely.com/v2/profile?apikey=<?php echo encodeURIComponent( $parsely_options['apikey'] ); ?>';
+			var rootUrl = 'https://api.parsely.com/v2/profile?apikey=<?php echo urlencode( $parsely_options['apikey'] ); ?>';
 			var uuid = '&uuid=' + PARSELY.config.parsely_site_uuid;
 			var requestUrl = rootUrl + uuid + '&url=' + window.location.href;
 			jQuery.ajax({
@@ -39,6 +39,6 @@
 	</script>
 <?php endif; ?>
 
-<script id="parsely-cfg" src="//static.parsely.com/keys/<?php echo encodeURIComponent( $parsely_options['apikey'] ); ?>/p.js"></script>
+<script id="parsely-cfg" src="//static.parsely.com/keys/<?php echo urlencode( $parsely_options['apikey'] ); ?>/p.js"></script>
 
 <!-- END Parse.ly Include: Standard -->
