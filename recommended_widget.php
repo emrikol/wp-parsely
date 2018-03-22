@@ -13,22 +13,23 @@ class Parsely_Recommended_Widget extends WP_Widget {
 		$title = apply_filters( 'widget_title', $instance['title'] );
 
 		$instance['display_options'] = ! empty( $instance['display_options'] ) ? $instance['display_options'] : array();
-		echo $args['before_widget'] . $args['before_title'] . $title . $args['after_title'];
+		echo $args['before_widget'] . $args['before_title'] . sanitize_text_field( $title ) . $args['after_title'];
 
 		// set up variables
 		$options = get_option( 'parsely' );
 		if ( is_array($options) && array_key_exists( 'apikey', $options ) && array_key_exists( 'api_secret', $options ) && ! empty( $options['api_secret'] ) ) {
-			$api_url       = 'https://api.parsely.com/v2/related';
-			add_query_arg('apikey', $options['apikey'], $api_url);
-			error_log($api_url);
-			add_query_arg('sort', trim( $instance['sort'] ), $api_url);
+			$root_url       = 'https://api.parsely.com/v2/related';
 			// No idea why boost is coming back with a space prepended: I've trimmed it everywhere I possibly could
 			// Trimming here too to avoid it ruining the query
-			add_query_arg('boost', trim( $instance['boost'] ), $api_url);
-		    add_query_arg('limit', $instance['return_limit'], $api_url);
+			$api_url = add_query_arg( array(
+				'apikey' => $options['apikey'],
+				'sort' => trim( $instance['sort']),
+				'boost' => trim( $instance['boost']),
+				'limit' => $instance['return_limit']
+			), $root_url );
 
 			if ( 0 !== (int) $instance['published_within'] ) {
-				add_query_arg('pub_date_start', ($instance['published_within'] .= 'd'), $api_url);
+				$api_url = add_query_arg('pub_date_start', ($instance['published_within'] .= 'd'), $api_url);
 			}
 			?>
 			<script data-cfasync="false">
@@ -52,18 +53,17 @@ class Parsely_Recommended_Widget extends WP_Widget {
 						var uuid = JSON.parse(unescape(cookieVal))['id'];
 					}
 
-					var api_url = '<?php echo wp_json_encode( $api_url ); ?>';
+					var api_url = <?php echo wp_json_encode( $api_url ); ?>;
 
 
 					var personalized = '<?php echo wp_json_encode( boolval( $instance['personalize_results'] ) ); ?>';
 					if ( personalized && uuid ) {
 						api_url += '&uuid=';
 						api_url += uuid;
-
 					}
 					else {
 						api_url += '&url=';
-						api_url += '<?php echo wp_json_encode( get_permalink() ); ?>';
+						api_url += <?php echo wp_json_encode( get_permalink() ); ?>;
 
 					}
 					var parentDiv = jQuery.find('#<?php echo esc_attr( $this->id ); ?>');
@@ -112,7 +112,7 @@ class Parsely_Recommended_Widget extends WP_Widget {
 
 			</script>
 			<?php
-		} else {
+		} elseif ( current_user_can( 'administrator' ) ) {
 			?>
 			<p>
 			you must set the Parsely API Secret for this widget to work!
@@ -174,7 +174,7 @@ class Parsely_Recommended_Widget extends WP_Widget {
 			<input type="text" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" value="<?php echo esc_attr( $title ); ?>" />
 		</p>
 		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'published_within' ) ); ?>">Published Within ( 0 for no limit ):</label>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'published_within' ) ); ?>">Days since publish ( 0 for no limit ):</label>
 			<br>
 			<input type="number" id="<?php echo esc_attr( $this->get_field_id( 'published_within' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'published_within' ) ); ?>" value="<?php echo esc_attr( (string) $instance['published_within'] ); ?>" min="0" max="30"/>
 		</p>
@@ -207,16 +207,12 @@ class Parsely_Recommended_Widget extends WP_Widget {
 			<select multiple="multiple" id="<?php echo esc_attr( $this->get_field_id( 'display_options' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'display_options' ) ); ?>[]" class="widefat" style="width:33%;">
 				<option
 					<?php
-					if ( in_array( 'display_author', $instance['display_options'], true ) ) {
-						echo 'selected="selected"';
-					};
+					selected( in_array('display_author', $instance['display_options']), true);
 				?>
 						value="display_author">Display Author</option>
 				<option
 					<?php
-					if ( in_array( 'display_thumbnail', $instance['display_options'], true ) ) {
-						echo 'selected="selected"';
-					};
+					selected( in_array( 'display_thumbnail', $instance['display_options']), true);
 					?>
 						value="display_thumbnail">Display Thumbnail</option>
 			</select>
@@ -234,12 +230,13 @@ class Parsely_Recommended_Widget extends WP_Widget {
 
 	public function update( $new_instance, $old_instance ) {
 		$instance                        = $old_instance;
+		error_log(print_r(array_values($instance['display_options'])));
 		$instance['title']               = trim( wp_strip_all_tags( $new_instance['title'] ) );
 		$instance['published_within']    = (int) trim( $new_instance['published_within'] );
 		$instance['return_limit']        = (int) $new_instance['return_limit'] <= 20 ? $new_instance['return_limit'] : '20';
 		$instance['sort']                = trim( $new_instance['sort'] );
 		$instance['boost']               = trim( $new_instance['boost'] );
-		$instance['display_options']     = esc_sql( $new_instance['display_options'] );
+		$instance['display_options']     = $new_instance['display_options'];
 		$instance['personalize_results'] = $new_instance['personalize_results'];
 		return $instance;
 	}
