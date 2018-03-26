@@ -109,7 +109,7 @@ class Parsely {
 	}
 
 	public function add_admin_header() {
-		include( 'parsely-admin-header.php' );
+		include( plugin_dir_path( __FILE__ ) . '/parsely-admin-header.php' );
 	}
 
 	/* Parsely settings page in Wordpress settings menu. */
@@ -127,7 +127,7 @@ class Parsely {
 			wp_die( esc_attr( 'You do not have sufficient permissions to access this page.' ) );
 		}
 
-		include( 'parsely-settings.php' );
+		include( plugin_dir_path( __FILE__ ) . '/parsely-settings.php' );
 	}
 
 	public function initialize_settings() {
@@ -264,7 +264,7 @@ class Parsely {
 				'option_key'       => 'custom_taxonomy_section',
 				'help_text'        => $h,
 				// filter Wordpress taxonomies under the hood that should not appear in dropdown
-				'select_options'   => array_diff( get_taxonomies(), array( 'post_tag', 'nav_menu', 'author', 'link_category', 'post_format' ) ),
+				'select_options'   => array_diff( get_taxonomies(), array( 'post_tag', 'nav_menu', 'author', 'link_category', 'post_format', 'vip-scan-review' ) ),
 				'requires_recrawl' => true,
 			)
 		);
@@ -623,7 +623,7 @@ class Parsely {
 		}
 
 		$parsely_page = apply_filters( 'after_set_parsely_page', $parsely_page, $post, $parsely_options );
-		include( 'parsely-parsely-page.php' );
+		include( plugin_dir_path( __FILE__ ) . '/parsely-parsely-page.php' );
 		return $parsely_page;
 	}
 
@@ -649,7 +649,7 @@ class Parsely {
 			$display = false;
 		}
 		if ( $display ) {
-			include( 'parsely-javascript.php' );
+			include( plugin_dir_path( __FILE__ ) . '/parsely-javascript.php' );
 		}
 	}
 
@@ -1127,4 +1127,4 @@ if ( class_exists( 'Parsely' ) ) {
 	$parsely = new Parsely();
 }
 
-include 'recommended_widget.php';
+include plugin_dir_path( __FILE__ ) . '/recommended_widget.php';
