@@ -721,7 +721,29 @@ class Parsely {
 
 		$current_url = $this->get_current_url();
 
-		if ( in_array( get_post_type(), $parsely_options['track_post_types'], true ) && 'publish' === $post->post_status ) {
+		if ( is_home() ) {
+			$parsely_page['@type'] = 'WebPage';
+			// If front page is set to display a static page, get the URL of the posts page.
+			if ( 'page' === get_option( 'show_on_front' ) ) {
+				$parsely_page['url'] = get_permalink( get_option( 'page_for_posts' ) );
+			} else {
+				$parsely_page['url'] = get_home_url();
+			}
+			$parsely_page['headline'] = $this->get_clean_parsely_page_value( get_bloginfo( 'name', 'raw' ) );
+		} elseif ( is_front_page() ) {
+			$parsely_page['headline'] = $this->get_clean_parsely_page_value( get_bloginfo( 'name', 'raw' ) );
+			$parsely_page['url']      = get_home_url();
+			$parsely_page['@type']    = 'WebPage';
+		} elseif ( is_archive() ) {
+			$parsely_page['@type'] = 'WebPage';
+			$parsely_page['url']   = $this->get_current_url();
+			if ( is_author() ) {
+				$author                   = get_user_by( 'slug', get_query_var( 'author_name' ) );
+				$parsely_page['headline'] = $this->get_clean_parsely_page_value( 'Author - ' . $author->display_name );
+			} else {
+				$parsely_page['headline'] = get_the_archive_title();
+			}
+		} elseif ( in_array( get_post_type(), $parsely_options['track_post_types'], true ) && 'publish' === $post->post_status ) {
 			$authors  = $this->get_author_names( $post );
 			$category = $this->get_category_name( $post, $parsely_options );
 			$post_id  = $parsely_options['content_id_prefix'] . (string) get_the_ID();
@@ -800,25 +822,9 @@ class Parsely {
 					'url'   => $parsely_options['logo'],
 				),
 			);
-
 		} elseif ( in_array( get_post_type(), $parsely_options['track_page_types'], true ) && 'publish' === $post->post_status ) {
 			$parsely_page['headline'] = $this->get_clean_parsely_page_value( get_the_title() );
 			$parsely_page['url']      = $this->get_current_url( 'post' );
-		}
-		if ( is_front_page() ) {
-			$parsely_page['headline'] = $this->get_clean_parsely_page_value( get_bloginfo( 'name', 'raw' ) );
-			$parsely_page['url']      = get_home_url();
-			$parsely_page['@type']    = 'WebPage';
-		}
-		if ( is_archive() ) {
-			$parsely_page['@type'] = 'WebPage';
-			$parsely_page['url']   = $this->get_current_url();
-			if ( is_author() ) {
-				$author                   = get_user_by( 'slug', get_query_var( 'author_name' ) );
-				$parsely_page['headline'] = $this->get_clean_parsely_page_value( 'Author - ' . $author->display_name );
-			} else {
-				$parsely_page['headline'] = get_the_archive_title();
-			}
 		}
 
 		$parsely_page = apply_filters( 'after_set_parsely_page', $parsely_page, $post, $parsely_options );
